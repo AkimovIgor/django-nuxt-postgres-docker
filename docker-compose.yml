@@ -1,0 +1,46 @@
+version: "3.7"
+
+services:
+
+  postgresql:
+    build:
+      context: .
+      dockerfile: ./docker/postgres/Dockerfile
+    restart: always
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    ports:
+      - "${PG_LOCAL_PORT}:${PG_CONTAINER_PORT}"
+    env_file:
+      - docker/postgres/db.env
+
+  django:
+    build:
+      context: .
+      dockerfile: ./docker/django/Dockerfile
+    restart: always
+    command: /bin/sh -c "${SCRIPTS_PATH}/start.sh"
+    env_file:
+      - docker/django/.env
+    volumes:
+      - ./back/:${PROJECT_PATH}
+    ports:
+      - "${DJANGO_LOCAL_PORT}:${DJANGO_CONTAINER_PORT}"
+    depends_on:
+      - postgresql
+
+  nuxt:
+    build:
+      context: .
+      dockerfile: ./docker/nuxt/Dockerfile
+    restart: always
+    command: /bin/sh -c "npm run dev"
+    env_file:
+      - docker/nuxt/.env
+    volumes:
+      - ./front/:${FRONT_PROJECT_PATH}
+    ports:
+      - "${NUXT_LOCAL_PORT}:${NUXT_CONTAINER_PORT}"
+
+volumes:
+  pg_data:
