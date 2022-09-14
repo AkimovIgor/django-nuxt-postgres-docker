@@ -9,24 +9,24 @@ RUN apk update \
     && adduser -D ${USERNAME} \
     && mkdir -p /usr/src/${USERNAME}/${PROJECTNAME} \
     && mkdir -p /usr/src/${USERNAME}/logs \
+    && mkdir -p /usr/src/${USERNAME}/scripts \
     && mkdir -p /usr/src/${USERNAME}/${PROJECTNAME}/dotenvs \
-    && chown -R ${USERNAME} /usr/src/${USERNAME}/*
-
-USER ${USERNAME}
-
-WORKDIR /usr/src/${USERNAME}/${PROJECTNAME}
+    && chown -R ${USERNAME} /usr/src/${USERNAME}/
 
 COPY ./docker/django/${ENV_MODE}_req.txt /usr/src/${USERNAME}/${PROJECTNAME}/req.txt
 COPY ./docker/django/start.sh /usr/src/${USERNAME}/scripts/start.sh
 COPY ./docker/postgres/db.env /usr/src/${USERNAME}/dotenvs/db.env
 
 RUN pip install -r /usr/src/${USERNAME}/${PROJECTNAME}/req.txt
-#RUN chmod +x /usr/src/${USERNAME}/scripts/start.sh
+RUN chmod +x /usr/src/${USERNAME}/scripts/start.sh
 RUN touch /usr/src/${USERNAME}/logs/django.log
 
-COPY ./back /usr/src/${USERNAME}/${PROJECTNAME}
+WORKDIR /usr/src/${USERNAME}/${PROJECTNAME}
 
-#RUN touch /usr/src/${USERNAME}/${PROJECTNAME}/dotenvs/db.env
-COPY ./docker/postgres/db.env /usr/src/${USERNAME}/${PROJECTNAME}/dotenvs/db.env
+COPY ./back .
+
+COPY ./docker/postgres/db.env ./dotenvs/db.env
+
+USER ${USERNAME}
 
 EXPOSE 8000

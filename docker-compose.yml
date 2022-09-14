@@ -39,6 +39,7 @@ services:
       - docker/nuxt/.env
     volumes:
       - ./front/:${FRONT_PROJECT_PATH}
+      - ${FRONT_PROJECT_PATH}/node_modules
     ports:
       - "${NUXT_LOCAL_PORT}:${NUXT_CONTAINER_PORT}"
 
